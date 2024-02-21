@@ -1,12 +1,14 @@
+import { Outlet, RouterProvider, createBrowserRouter } from "react-router-dom";
 import "./App.css";
 import Sidebar from "./components/Sidebar";
-import DemoPage from "./components/payments/page";
+import { Toaster } from "./components/ui/toaster";
 
 function App() {
   return (
     <div className="flex ">
       <Sidebar />
-      <DemoPage />
+      <Outlet />
+      <Toaster />
     </div>
   );
 }
