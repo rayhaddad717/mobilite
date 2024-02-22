@@ -17,6 +17,14 @@ export const columns: ColumnDef<University>[] = [
     header: "University Name",
   },
   {
+    accessorKey: "country",
+    header:"Country Name"
+  },
+  {
+    accessorKey:"website",
+    header:"Website"
+  },
+  {
     accessorKey: "actions",
     header: "Actions",
     cell({ row }) {

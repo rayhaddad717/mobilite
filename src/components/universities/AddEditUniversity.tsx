@@ -20,13 +20,31 @@ import { useEffect, useState } from "react";
 import { AxiosResponse } from "axios";
 import ConfirmDialog from "../shared/ConfirmDialog";
 
+const websiteRegex = /^www\..+\.com$/;
+
 const formSchema = z.object({
-  university_name: z.string().min(2, {
-    message: "University Name must be at least 2 characters.",
+  university_name: z.string().min(2,{
+    message:"university must be at least 2 characters."
   }),
+  country:z.string().min(2,{
+    message:"country must be at least 2 characters.",
+  }),
+  website:z.string().refine(value => websiteRegex.test(value), {
+    message: "Website must start with 'www.' and end with '.com'"
+  }),
+  convention_info:z.string().min(2,{
+    message:"Information of convention must be at least 2 characters.",
+  }),
+  convention_date:z.date(),
+  procedure_inscription:z.string().min(2,{
+    message:"procedure of inscription must be at least 2 characters.",
+  }),
+  is_free:z.boolean(),
+  
 });
 const API_URL_HEADER = "university";
 function AddEditUniversity() {
+  const [isUniversityFree, setIsUniversityFree] = useState(false); 
   const navigate = useNavigate();
   const params = useParams();
   const [isAdd] = useState(!params?.id);
@@ -35,8 +53,19 @@ function AddEditUniversity() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       university_name: "",
+      country:"",
+      website:"",
+      is_free:false,
+      convention_info:"",
+      convention_date:new Date(),
+      procedure_inscription:"",
+      
     },
   });
+  // Add event handler to update isUniversityFree state
+  const handleUniversityFreeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIsUniversityFree(e.target.value === "yes");
+  };
   async function getUniversity() {
     try {
       const response = await API.get<any, AxiosResponse<APIResponse<any>>>(
@@ -44,6 +73,12 @@ function AddEditUniversity() {
       );
       if (response.data.statusCode === 200) {
         form.setValue("university_name", response.data.data.university_name!);
+        form.setValue("country",response.data.data.country!);
+        form.setValue("website",response.data.data.website!);
+        form.setValue("is_free",response.data.data.is_free!);
+        form.setValue("convention_date",response.data.data.convention_date!);
+        form.setValue("convention_info",response.data.data.convention_info!);
+        form.setValue("procedure_inscription",response.data.data.procedure_inscription!);
       }
     } catch (error) {
       toast({
@@ -118,13 +153,114 @@ function AddEditUniversity() {
               name="university_name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Username</FormLabel>
+                  <FormLabel>University Name</FormLabel>
                   <FormControl>
                     <Input placeholder="ULFG" {...field} />
                   </FormControl>
                   <FormDescription>
                     This is the university name.
                   </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="country"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Country</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Country" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    This is the country name.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="website"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Website</FormLabel>
+                  <FormControl>
+                    <Input placeholder="www.univeristy.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="is_free"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>University public</FormLabel>
+                  <label>
+                      <input
+                        type="radio"
+                        name="is_free"
+                        value="yes"
+                        checked={isUniversityFree}
+                        onChange={handleUniversityFreeChange}
+                      />
+                      Yes
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="is_free"
+                        value="no"
+                        checked={!isUniversityFree}
+                        onChange={handleUniversityFreeChange}
+                      />
+                      No
+                    </label>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="convention_info"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Convention Information</FormLabel>
+                  <FormControl>
+                    <Input placeholder="" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="convention_date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Convention Date</FormLabel>
+                  <FormControl>
+                  
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="procedure_inscription"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Procedure Inscription</FormLabel>
+                  <FormControl>
+                    <Input placeholder="" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
