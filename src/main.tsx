@@ -6,12 +6,15 @@ import "./index.css";
 import UniversityPage from "./components/universities/page.tsx";
 import ErrorPage from "./components/ErrorPage.tsx";
 import AddEditUniversity from "./components/universities/AddEditUniversity.tsx";
+import DepartmentPage from "./components/departments/page.tsx";
+import AddEditDepartment from "./components/departments/AddEditDepartment.tsx";
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     errorElement: <ErrorPage />,
     children: [
+      //UNIVERSITY
       {
         path: "/university",
         element: <UniversityPage />,
@@ -24,6 +27,21 @@ const router = createBrowserRouter([
         path: "/university/:id",
         element: <AddEditUniversity />,
       },
+      //END UNIVERSITY
+      //UNIVERSITY
+      {
+        path: "/department",
+        element: <DepartmentPage />,
+      },
+      {
+        path: "/department/add",
+        element: <AddEditDepartment />,
+      },
+      {
+        path: "/department/:id",
+        element: <AddEditDepartment />,
+      },
+      //END UNIVERSITY
     ],
   },
 ]);

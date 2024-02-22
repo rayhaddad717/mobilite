@@ -1,0 +1,32 @@
+"use client";
+
+import { ColumnDef } from "@tanstack/react-table";
+import { Button } from "../ui/button";
+import { Link } from "react-router-dom";
+
+// This type is used to define the shape of our data.
+// You can use a Zod schema here if you want.
+export type University = {
+  id: number;
+  university_name: string;
+};
+
+export const columns: ColumnDef<University>[] = [
+  {
+    accessorKey: "department_name",
+    header: "Department Name",
+  },
+  {
+    accessorKey: "actions",
+    header: "Actions",
+    cell({ row }) {
+      return (
+        <div className="flex gap-2">
+          <Link to={`/department/${row.original.id}`}>
+            <Button variant="secondary">View</Button>
+          </Link>
+        </div>
+      );
+    },
+  },
+];

@@ -10,7 +10,7 @@ function Sidebar() {
       <ul className="flex flex-col gap-2 px-2">
         {[
           { title: "Universities", url: "university" },
-          { title: "Departments", url: "departments" },
+          { title: "Departments", url: "department" },
           { title: "Master Programs,", url: "master-program" },
           { title: "Scholarships", url: "scholarships" },
           { title: "Candidates", url: "candidates" },
