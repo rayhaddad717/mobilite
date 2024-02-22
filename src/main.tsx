@@ -5,7 +5,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 import UniversityPage from "./components/universities/page.tsx";
 import ErrorPage from "./components/ErrorPage.tsx";
-import AddUniversity from "./components/universities/AddUniversity.tsx";
+import AddEditUniversity from "./components/universities/AddEditUniversity.tsx";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -18,7 +18,11 @@ const router = createBrowserRouter([
       },
       {
         path: "/university/add",
-        element: <AddUniversity />,
+        element: <AddEditUniversity />,
+      },
+      {
+        path: "/university/:id",
+        element: <AddEditUniversity />,
       },
     ],
   },

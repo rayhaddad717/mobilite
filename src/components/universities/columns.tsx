@@ -2,7 +2,6 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "../ui/button";
-import API from "@/api/API";
 import { Link } from "react-router-dom";
 
 // This type is used to define the shape of our data.
@@ -23,12 +22,9 @@ export const columns: ColumnDef<University>[] = [
     cell({ row }) {
       return (
         <div className="flex gap-2">
-          <Button variant="secondary">
-            <Link to={`/university/add?id=${row.original.id}`}>Edit</Link>
-          </Button>
-          <Button variant="destructive">
-            <Link to={`/university`}>Delete</Link>
-          </Button>
+          <Link to={`/university/${row.original.id}`}>
+            <Button variant="secondary">View</Button>
+          </Link>
         </div>
       );
     },

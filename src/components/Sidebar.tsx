@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 function Sidebar() {
   const location = useLocation();
   return (
-    <div className="w-[300px] h-[100vh] bg-white pt-4 border-r-[1px] border-gray-300">
+    <div className="w-[300px] max-w-[30vw] h-[100vh] bg-white pt-4 border-r-[1px] border-gray-300">
       <h2 className="text-black text-center font-bold text-2xl mb-6">
         Mobilite
       </h2>
