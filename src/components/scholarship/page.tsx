@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { University, columns } from "./columns";
+import { Scholarship, columns } from "./columns";
 import { DataTable } from "./data-table";
 import { Button } from "../ui/button";
 import API, { APIResponse } from "@/api/API";
@@ -8,9 +8,10 @@ import { useToast } from "../ui/use-toast";
 import { ToastAction } from "@radix-ui/react-toast";
 import { saveAs } from "file-saver";
 import { AxiosResponse } from "axios";
-const API_URL_HEADER = "university";
-export default function UniversityPage() {
-  const [universities, setUniversities] = useState<University[]>([]);
+const API_URL_HEADER = "scholarship";
+const NAVIGATE_HEADER = "scholarship";
+export default function ScholarshipPage() {
+  const [universities, setUniversities] = useState<Scholarship[]>([]);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
@@ -67,10 +68,10 @@ export default function UniversityPage() {
       const file = new Blob([response.data], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      saveAs(file, "universities.xlsx");
+      saveAs(file, `${NAVIGATE_HEADER}.xlsx`);
       toast({
         title: "Success",
-        description: `Successfully exported universities`,
+        description: `Successfully exported ${NAVIGATE_HEADER}`,
         action: <ToastAction altText="Goto schedule to undo">Done</ToastAction>,
       });
     } catch (error) {
@@ -82,7 +83,7 @@ export default function UniversityPage() {
   }
   const fetchData = useCallback(async () => {
     try {
-      const result = await API.get<any, APIResponse<University[]>>(
+      const result = await API.get<any, APIResponse<Scholarship[]>>(
         `/${API_URL_HEADER}`
       );
       setUniversities(result.data);
@@ -93,10 +94,15 @@ export default function UniversityPage() {
   }, []);
   return (
     <div className="container mx-auto py-10 overflow-x-auto">
-      <h2 className="font-bold text-2xl mb-4">List of Universities</h2>
+      <h2 className="font-bold text-2xl mb-4">
+        List of {NAVIGATE_HEADER.charAt(0).toUpperCase()}
+        {NAVIGATE_HEADER.slice(1)}s
+      </h2>
       <div className="flex justify-end mb-4 gap-2">
-        <Button onClick={() => navigate("/university/add")}>Add</Button>
-
+        <Button onClick={() => navigate(`/${NAVIGATE_HEADER}/add`)}>Add</Button>
+        {/* <Button variant="secondary" onClick={handleImportButtonClick}>
+          Import
+        </Button> */}
         <Button variant="secondary" onClick={exportUniversities}>
           Export
         </Button>

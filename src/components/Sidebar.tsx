@@ -10,12 +10,10 @@ function Sidebar() {
       <ul className="flex flex-col gap-2 px-2">
         {[
           { title: "Universities", url: "university" },
-          { title: "Departments", url: "department" },
-          { title: "Bourse",url: "bourse"},
-          { title: "Master", url: "master" },
-          { title: "Inscriptions", url: "inscriptions" },
+          { title: "Scholarship", url: "scholarship" },
+          { title: "Master", url: "masters" },
           { title: "Students", url: "students" },
-          
+          { title: "Inscriptions", url: "inscriptions" },
         ].map((nav, index) => (
           <li
             key={index}

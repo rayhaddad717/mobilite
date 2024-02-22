@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 export type University = {
   id: number;
   university_name: string;
+  is_free: boolean;
 };
 
 export const columns: ColumnDef<University>[] = [
@@ -18,11 +19,18 @@ export const columns: ColumnDef<University>[] = [
   },
   {
     accessorKey: "country",
-    header:"Country Name"
+    header: "Country Name",
   },
   {
-    accessorKey:"website",
-    header:"Website"
+    accessorKey: "website",
+    header: "Website",
+  },
+  {
+    accessorKey: "is_free",
+    header: "Public",
+    cell({ row }) {
+      return <p>{row.original.is_free ? "Yes" : "No"}</p>;
+    },
   },
   {
     accessorKey: "actions",

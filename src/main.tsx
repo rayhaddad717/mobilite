@@ -6,8 +6,10 @@ import "./index.css";
 import UniversityPage from "./components/universities/page.tsx";
 import ErrorPage from "./components/ErrorPage.tsx";
 import AddEditUniversity from "./components/universities/AddEditUniversity.tsx";
-import DepartmentPage from "./components/departments/page.tsx";
-import AddEditDepartment from "./components/departments/AddEditDepartment.tsx";
+import ScholarshipPage from "./components/scholarship/page.tsx";
+import AddEditScholarship from "./components/scholarship/AddEditScholarship.tsx";
+import MastersPage from "./components/masters/page.tsx";
+import AddEditMasters from "./components/masters/AddEditMasters.tsx";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -28,20 +30,34 @@ const router = createBrowserRouter([
         element: <AddEditUniversity />,
       },
       //END UNIVERSITY
-      //UNIVERSITY
+      //SCHOLARSHIP
       {
-        path: "/department",
-        element: <DepartmentPage />,
+        path: "/scholarship",
+        element: <ScholarshipPage />,
       },
       {
-        path: "/department/add",
-        element: <AddEditDepartment />,
+        path: "/scholarship/add",
+        element: <AddEditScholarship />,
       },
       {
-        path: "/department/:id",
-        element: <AddEditDepartment />,
+        path: "/scholarship/:id",
+        element: <AddEditScholarship />,
       },
-      //END UNIVERSITY
+      //END SCHOLARSHIP
+      //MASTERS
+      {
+        path: "/masters",
+        element: <MastersPage />,
+      },
+      {
+        path: "/masters/add",
+        element: <AddEditMasters />,
+      },
+      {
+        path: "/masters/:id",
+        element: <AddEditMasters />,
+      },
+      //END MASTERS
     ],
   },
 ]);
