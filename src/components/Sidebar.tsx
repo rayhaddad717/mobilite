@@ -11,9 +11,11 @@ function Sidebar() {
         {[
           { title: "Universities", url: "university" },
           { title: "Departments", url: "department" },
-          { title: "Master Programs,", url: "master-program" },
-          { title: "Scholarships", url: "scholarships" },
-          { title: "Candidates", url: "candidates" },
+          { title: "Bourse",url: "bourse"},
+          { title: "Master", url: "master" },
+          { title: "Inscriptions", url: "inscriptions" },
+          { title: "Students", url: "students" },
+          
         ].map((nav, index) => (
           <li
             key={index}
