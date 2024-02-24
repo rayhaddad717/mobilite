@@ -14,6 +14,10 @@ export type University = {
 
 export const columns: ColumnDef<University>[] = [
   {
+    accessorKey: "id",
+    header: "ID",
+  },
+  {
     accessorKey: "university_name",
     header: "University Name",
   },

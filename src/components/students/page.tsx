@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { StudentInscription, columns } from "./columns";
 import { DataTable } from "./data-table";
 import { Button } from "../ui/button";
 import API, { APIResponse } from "@/api/API";
@@ -8,17 +7,11 @@ import { useToast } from "../ui/use-toast";
 import { ToastAction } from "@radix-ui/react-toast";
 import { saveAs } from "file-saver";
 import { AxiosResponse } from "axios";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
-const API_URL_HEADER = "student_inscription";
-const NAVIGATE_HEADER = "student_inscription";
-export default function StudentInscriptionPage() {
-  const [data, setData] = useState<StudentInscription[]>([]);
+import { Students, columns } from "./columns";
+const API_URL_HEADER = "students";
+const NAVIGATE_HEADER = "students";
+export default function StudentsPage() {
+  const [data, setData] = useState<Students[]>([]);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
@@ -66,16 +59,9 @@ export default function StudentInscriptionPage() {
       fileInputRef.current.click();
     } catch (error) {}
   }
-  async function exportUniversities(
-    type:
-      | "inscrit"
-      | "autorise-elligible"
-      | "non-autorise-list-attente" //NOT ELLIGILE
-      | "admis"
-      | "will-travel"
-  ) {
+  async function exportUniversities() {
     try {
-      const response = await API.get(`/${API_URL_HEADER}/export?type=${type}`, {
+      const response = await API.get(`/${API_URL_HEADER}/export`, {
         responseType: "blob",
       });
       // Use file-saver or a similar library to save the blob as a file
@@ -97,7 +83,7 @@ export default function StudentInscriptionPage() {
   }
   const fetchData = useCallback(async () => {
     try {
-      const result = await API.get<any, APIResponse<StudentInscription[]>>(
+      const result = await API.get<any, APIResponse<Students[]>>(
         `/${API_URL_HEADER}`
       );
       setData(result.data);
@@ -108,47 +94,18 @@ export default function StudentInscriptionPage() {
   }, []);
   return (
     <div className="container mx-auto py-10 overflow-x-auto">
-      <h2 className="font-bold text-2xl mb-4">List of Student Inscriptions</h2>
+      <h2 className="font-bold text-2xl mb-4">
+        List of {NAVIGATE_HEADER.charAt(0).toUpperCase()}
+        {NAVIGATE_HEADER.slice(1)}
+      </h2>
       <div className="flex justify-end mb-4 gap-2">
         <Button onClick={() => navigate(`/${NAVIGATE_HEADER}/add`)}>Add</Button>
-        <Button variant="secondary">
-          <a download="Template.xlsx" href="/Inscription Template.xlsx">
-            Download Template
-          </a>
-        </Button>
-        <Button variant="secondary" onClick={handleImportButtonClick}>
+        {/* <Button variant="secondary" onClick={handleImportButtonClick}>
           Import
+        </Button> */}
+        <Button variant="secondary" onClick={exportUniversities}>
+          Export
         </Button>
-        <Select
-          onValueChange={(value) =>
-            exportUniversities(
-              value as
-                | "inscrit"
-                | "autorise-elligible"
-                | "non-autorise-list-attente"
-                | "admis"
-                | "will-travel"
-            )
-          }
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Export" />
-          </SelectTrigger>
-          <SelectContent>
-            {[
-              { name: "Download Inscrits", value: "inscrit" },
-              { name: "Download Autorise", value: "autorise-elligible" },
-              {
-                name: "Download List D'attente",
-                value: "non-autorise-list-attente",
-              },
-              { name: "Download Admis", value: "admis" },
-              { name: "Download Etudiant en voyage", value: "will-travel" },
-            ].map((type) => (
-              <SelectItem value={type.value}>{type.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
       <DataTable columns={columns} data={data} />
       <input

@@ -1,7 +1,15 @@
-import { useLocation } from "react-router-dom";
+import API from "@/api/API";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  if (localStorage.getItem("isLoggedIn") !== "true") return null;
+  const logout = async () => {
+    localStorage.clear();
+    navigate("/login");
+    await API.get("/logout");
+  };
   return (
     <div className="w-[300px] max-w-[30vw] h-[100vh] bg-white pt-4 border-r-[1px] border-gray-300">
       <h2 className="text-black text-center font-bold text-2xl mb-6">
@@ -12,7 +20,8 @@ function Sidebar() {
           { title: "Universities", url: "university" },
           { title: "Scholarship", url: "scholarship" },
           { title: "Master", url: "masters" },
-          { title: "Student Inscriptions", url: "studentinscription" },
+          { title: "Students", url: "students" },
+          { title: "Student Inscriptions", url: "student_inscription" },
         ].map((nav, index) => (
           <li
             key={index}
@@ -27,6 +36,12 @@ function Sidebar() {
             </a>
           </li>
         ))}
+        <li
+          className="px-2 py-2  font-normal cursor-pointer bg- rounded-md  duration-0 transition-all ease-in-out hover:bg-gray-200"
+          onClick={logout}
+        >
+          Logout
+        </li>
       </ul>
     </div>
   );

@@ -19,6 +19,10 @@ export type Scholarship = {
 
 export const columns: ColumnDef<Scholarship>[] = [
   {
+    accessorKey: "id",
+    header: "ID",
+  },
+  {
     accessorKey: "name",
     header: "Name",
   },

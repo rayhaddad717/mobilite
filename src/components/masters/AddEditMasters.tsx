@@ -51,9 +51,13 @@ const formSchema = z.object({
   exemption_fees: z.string().refine((val) => !Number.isNaN(parseInt(val, 10)), {
     message: "Expected number, received a string",
   }),
-  entretien_motivation: z.string(),
-  oral_exam: z.string(),
-  written_exam: z.string(),
+  is_entretien_motivation: z.string(),
+  is_oral_exam: z.string(),
+  is_written_exam: z.string(),
+  entretien_motivation: z.date().nullable().optional(),
+  oral_exam: z.date().nullable().optional(),
+  date_d_appel: z.date(),
+  written_exam: z.date().nullable().optional(),
   nb_students: z.string().refine((val) => !Number.isNaN(parseInt(val, 10)), {
     message: "Expected number, received a string",
   }),
@@ -72,6 +76,7 @@ function AddEditMasters() {
   const navigate = useNavigate();
   const params = useParams();
   const [isAdd] = useState(!params?.id);
+  const [render, Rerender] = useState(false);
   const [universities, setUniversities] = useState<University[]>([]);
   const [scholarships, setScholarships] = useState<Scholarship[]>([]);
   const { toast } = useToast();
@@ -87,9 +92,9 @@ function AddEditMasters() {
       nb_students: "0",
       id_bourse: "0",
       recrutement_sur_dossier: "false",
-      entretien_motivation: "false",
-      oral_exam: "false",
-      written_exam: "false",
+      is_entretien_motivation: "false",
+      is_oral_exam: "false",
+      is_written_exam: "false",
       result_dates: new Date(),
       date_candidature_deposit: new Date(),
     },
@@ -115,7 +120,7 @@ function AddEditMasters() {
       if (response.data.statusCode === 200) {
         form.setValue(
           "university_id",
-          response.data.data.university_id.toString()
+          response.data.data.university_id?.toString()
         ); // Assuming university_id is a number
         form.setValue("name", response.data.data.name);
         form.setValue(
@@ -129,25 +134,44 @@ function AddEditMasters() {
         );
         form.setValue(
           "exemption_fees",
-          response.data.data.exemption_fees.toString()
+          response.data.data.exemption_fees?.toString()
         ); // Assuming exemption_fees is a number
         form.setValue(
           "recrutement_sur_dossier",
           convertToBooleanString(response.data.data.recrutement_sur_dossier)
         );
         form.setValue(
-          "entretien_motivation",
-          convertToBooleanString(response.data.data.entretien_motivation)
+          "is_entretien_motivation",
+          convertToBooleanString(!!response.data.data.entretien_motivation)
         );
         form.setValue(
-          "oral_exam",
-          convertToBooleanString(response.data.data.oral_exam)
+          "date_d_appel",
+          new Date(response.data.data.date_d_appel)
         );
+        if (response.data.data.entretien_motivation)
+          form.setValue(
+            "entretien_motivation",
+            new Date(response.data.data.entretien_motivation)
+          );
         form.setValue(
-          "written_exam",
-          convertToBooleanString(response.data.data.written_exam)
+          "is_oral_exam",
+          convertToBooleanString(!!response.data.data.oral_exam)
         );
-        form.setValue("nb_students", response.data.data.nb_students.toString()); // Assuming nb_students is a number
+        if (response.data.data.oral_exam)
+          form.setValue("oral_exam", new Date(response.data.data.oral_exam));
+        form.setValue(
+          "is_written_exam",
+          convertToBooleanString(!!response.data.data.written_exam)
+        );
+        if (response.data.data.written_exam)
+          form.setValue(
+            "written_exam",
+            new Date(response.data.data.written_exam)
+          );
+        form.setValue(
+          "nb_students",
+          response.data.data.nb_students?.toString()
+        ); // Assuming nb_students is a number
         form.setValue(
           "result_dates",
           new Date(response.data.data.result_dates)
@@ -156,7 +180,10 @@ function AddEditMasters() {
           "date_candidature_deposit",
           new Date(response.data.data.date_candidature_deposit)
         );
-        form.setValue("id_bourse", response.data.data.id_bourse.toString()); // Assuming id_bourse is a number
+        if (response.data.data.id_bourse?.toString())
+          form.setValue("id_bourse", response.data.data.id_bourse?.toString());
+        // Assuming id_bourse is a number
+        else form.setValue("id_bourse", "-1");
       }
     } catch (error) {
       toast({
@@ -171,7 +198,7 @@ function AddEditMasters() {
       if (response?.data?.statusCode === 200) {
         toast({
           title: "Success",
-          description: `Successfully deleted university ${NAVIGATE_HEADER}`,
+          description: `Successfully deleted ${NAVIGATE_HEADER}`,
           action: (
             <ToastAction altText="Goto schedule to undo">Done</ToastAction>
           ),
@@ -197,11 +224,13 @@ function AddEditMasters() {
       payload.recrutement_sur_dossier = convertToStringBoolean(
         payload.recrutement_sur_dossier
       );
-      payload.entretien_motivation = convertToStringBoolean(
-        payload.entretien_motivation
-      );
-      payload.oral_exam = convertToStringBoolean(payload.oral_exam);
-      payload.written_exam = convertToStringBoolean(payload.written_exam);
+      if (payload.is_entretien_motivation != "true")
+        payload.entretien_motivation = null;
+      if (payload.is_oral_exam != "true") payload.oral_exam = null;
+      if (payload.is_written_exam != "true") payload.written_exam = null;
+      delete payload.is_entretien_motivation;
+      delete payload.is_oral_exam;
+      delete payload.is_written_exam;
       const response = await API.post<any, APIResponse<any>>(
         `/${API_URL_HEADER}`,
         payload
@@ -222,7 +251,10 @@ function AddEditMasters() {
         navigate(`/${NAVIGATE_HEADER}`);
       }
     } catch (error) {
-      console.error(error);
+      toast({
+        title: "Error",
+        description: "Something went wrong",
+      });
     }
   }
   useEffect(() => {
@@ -231,12 +263,9 @@ function AddEditMasters() {
       getData();
     }
   }, [isAdd]);
-  if (!universities.length || !scholarships.length) return <h1>loading</h1>;
+  if (!universities.length) return <h1>loading</h1>;
   return (
     <div className="container mt-4 flex flex-col gap-4">
-      <h2 className="text-3xl">
-        {isAdd ? `Add a new ${NAVIGATE_HEADER}` : `${NAVIGATE_HEADER} Details`}
-      </h2>
       <div className="max-h-[90vh] overflow-y-auto pb-4 pl-4 pr-4">
         <Form {...form}>
           <form
@@ -248,6 +277,10 @@ function AddEditMasters() {
               columnGap: "5%",
             }}
           >
+            <h2 className="text-2xl font-bold">
+              {isAdd ? `Add a new Masters` : `Masters Details`}
+            </h2>
+            <p></p>
             <FormField
               control={form.control}
               name="name"
@@ -266,10 +299,25 @@ function AddEditMasters() {
               name="departement_target"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Department Target</FormLabel>
-                  <FormControl>
-                    <Input placeholder="" {...field} />
-                  </FormControl>
+                  <FormLabel>Department</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    value={field.value?.toString()}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a Department" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {["GE", "GM", "GC", "GP"].map((depart, index) => (
+                        <SelectItem key={`depart-${index}`} value={`${depart}`}>
+                          {depart}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -293,9 +341,29 @@ function AddEditMasters() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Language Required</FormLabel>
-                  <FormControl>
-                    <Input placeholder="" {...field} />
-                  </FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    value={field.value?.toString()}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a Test" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {["TOEFUL", "DELF B2", "DELF B1", "SAT", "IELTS"].map(
+                        (depart, index) => (
+                          <SelectItem
+                            key={`depart-${index}`}
+                            value={`${depart}`}
+                          >
+                            {depart}
+                          </SelectItem>
+                        )
+                      )}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -305,7 +373,7 @@ function AddEditMasters() {
               name="exemption_fees"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Exemption Fees</FormLabel>
+                  <FormLabel>Fees</FormLabel>
                   <FormControl>
                     <Input placeholder="" {...field} />
                   </FormControl>
@@ -361,7 +429,8 @@ function AddEditMasters() {
                   <FormLabel>Scholarship</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    defaultValue="-1"
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -369,6 +438,7 @@ function AddEditMasters() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
+                      <SelectItem value={`-1`}>None</SelectItem>
                       {scholarships.map((scho) => (
                         <SelectItem key={scho.id} value={`${scho.id}`}>
                           {scho.name}
@@ -403,76 +473,6 @@ function AddEditMasters() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="entretien_motivation"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Entretien de Motivation</FormLabel>
-                  <RadioGroup
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="true" id="r1" />
-                      <Label htmlFor="r1">Yes</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="false" id="r2" />
-                      <Label htmlFor="r2">No</Label>
-                    </div>
-                  </RadioGroup>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="oral_exam"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Oral Exam</FormLabel>
-                  <RadioGroup
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="true" id="r1" />
-                      <Label htmlFor="r1">Yes</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="false" id="r2" />
-                      <Label htmlFor="r2">No</Label>
-                    </div>
-                  </RadioGroup>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="written_exam"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Written Exam</FormLabel>
-                  <RadioGroup
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="true" id="r1" />
-                      <Label htmlFor="r1">Yes</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="false" id="r2" />
-                      <Label htmlFor="r2">No</Label>
-                    </div>
-                  </RadioGroup>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               control={form.control}
               name="date_candidature_deposit"
@@ -514,6 +514,208 @@ function AddEditMasters() {
             />
             <FormField
               control={form.control}
+              name="is_entretien_motivation"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Entretien de Motivation</FormLabel>
+                  <RadioGroup
+                    onValueChange={(e) => {
+                      field.onChange(e);
+                      Rerender(!render);
+                    }}
+                    value={field.value}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="true" id="r1" />
+                      <Label htmlFor="r1">Yes</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="false" id="r2" />
+                      <Label htmlFor="r2">No</Label>
+                    </div>
+                  </RadioGroup>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {form.getValues().is_entretien_motivation === "true" && (
+              <FormField
+                control={form.control}
+                name="entretien_motivation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date d'entretien de Motivation</FormLabel>
+                    <br></br>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-[240px] pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value as Date}
+                          onSelect={field.onChange}
+                          disabled={(date) => date < new Date("1900-01-01")}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </FormItem>
+                )}
+              />
+            )}
+            <FormField
+              control={form.control}
+              name="is_oral_exam"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Oral Exam</FormLabel>
+                  <RadioGroup
+                    onValueChange={(e) => {
+                      field.onChange(e);
+                      Rerender(!render);
+                    }}
+                    value={field.value}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="true" id="r1" />
+                      <Label htmlFor="r1">Yes</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="false" id="r2" />
+                      <Label htmlFor="r2">No</Label>
+                    </div>
+                  </RadioGroup>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {form.getValues().is_oral_exam === "true" && (
+              <FormField
+                control={form.control}
+                name="oral_exam"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Oral Exam Date</FormLabel>
+                    <br></br>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-[240px] pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value as Date}
+                          onSelect={field.onChange}
+                          disabled={(date) => date < new Date("1900-01-01")}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </FormItem>
+                )}
+              />
+            )}
+            <FormField
+              control={form.control}
+              name="is_written_exam"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Written Exam</FormLabel>
+                  <RadioGroup
+                    onValueChange={(e) => {
+                      field.onChange(e);
+                      Rerender(!render);
+                    }}
+                    value={field.value}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="true" id="r1" />
+                      <Label htmlFor="r1">Yes</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="false" id="r2" />
+                      <Label htmlFor="r2">No</Label>
+                    </div>
+                  </RadioGroup>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {form.getValues().is_written_exam === "true" && (
+              <FormField
+                control={form.control}
+                name="written_exam"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Written Exam Date</FormLabel>
+                    <br></br>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-[240px] pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value as Date}
+                          onSelect={field.onChange}
+                          disabled={(date) => date < new Date("1900-01-01")}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </FormItem>
+                )}
+              />
+            )}
+
+            <FormField
+              control={form.control}
               name="result_dates"
               render={({ field }) => (
                 <FormItem>
@@ -551,16 +753,60 @@ function AddEditMasters() {
                 </FormItem>
               )}
             />
-            <Button
-              variant="secondary"
-              className="mr-4"
-              onClick={() => navigate(`/${NAVIGATE_HEADER}`)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit">{isAdd ? "Add" : "Edit"}</Button>
+            <FormField
+              control={form.control}
+              name="date_d_appel"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Date D'appel</FormLabel>
+                  <br></br>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-[240px] pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value as Date}
+                        onSelect={field.onChange}
+                        disabled={(date) => date < new Date("1900-01-01")}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </FormItem>
+              )}
+            />
           </form>
         </Form>
+        <div className="w-full flex items-center justify-end gap-4">
+          <Button
+            size="lg"
+            variant="secondary"
+            className="mr-4"
+            onClick={() => navigate(`/${NAVIGATE_HEADER}`)}
+          >
+            Cancel
+          </Button>
+          <Button size="lg" onClick={form.handleSubmit(onSubmit)}>
+            {isAdd ? "Add" : "Edit"}
+          </Button>
+        </div>
         <ConfirmDialog
           confirmMessage={"Confirm"}
           onClick={onDelete}

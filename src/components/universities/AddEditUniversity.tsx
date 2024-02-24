@@ -364,12 +364,22 @@ function AddEditUniversity() {
   }, [isAdd]);
   return (
     <div className="container mt-4 flex flex-col gap-4">
-      <h2 className="text-3xl">
-        {isAdd ? "Add a new University" : "University Details"}
-      </h2>
-      <div className="max-w-[400px]">
+      <div className="w-full">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-8"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "45% 45%",
+              columnGap: "5%",
+            }}
+          >
+            <h2 className="text-2xl font-bold">
+              {" "}
+              {isAdd ? "Add a new University" : "University Details"}
+            </h2>
+            <p></p>
             <FormField
               control={form.control}
               name="university_name"
@@ -520,16 +530,21 @@ function AddEditUniversity() {
                 </FormItem>
               )}
             />
-            <Button
-              variant="secondary"
-              className="mr-4"
-              onClick={() => navigate("/university")}
-            >
-              Cancel
-            </Button>
-            <Button type="submit">{isAdd ? "Add" : "Edit"}</Button>
           </form>
         </Form>
+        <div className="w-full flex items-center gap-4 justify-end">
+          <Button
+            size={"lg"}
+            variant="secondary"
+            className="mr-4"
+            onClick={() => navigate("/university")}
+          >
+            Cancel
+          </Button>
+          <Button size={"lg"} onClick={form.handleSubmit(onSubmit)}>
+            {isAdd ? "Add" : "Edit"}
+          </Button>
+        </div>
         <ConfirmDialog
           confirmMessage={"Confirm"}
           onClick={onDelete}
