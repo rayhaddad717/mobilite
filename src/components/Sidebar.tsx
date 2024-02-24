@@ -12,8 +12,7 @@ function Sidebar() {
           { title: "Universities", url: "university" },
           { title: "Scholarship", url: "scholarship" },
           { title: "Master", url: "masters" },
-          { title: "Students", url: "students" },
-          { title: "Inscriptions", url: "inscriptions" },
+          { title: "Student Inscriptions", url: "studentinscription" },
         ].map((nav, index) => (
           <li
             key={index}

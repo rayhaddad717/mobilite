@@ -10,6 +10,10 @@ import ScholarshipPage from "./components/scholarship/page.tsx";
 import AddEditScholarship from "./components/scholarship/AddEditScholarship.tsx";
 import MastersPage from "./components/masters/page.tsx";
 import AddEditMasters from "./components/masters/AddEditMasters.tsx";
+import StudentsInscriptionPage from "./components/studentinscription/page.tsx";
+import AddEditStudentsInscription from "./components/studentinscription/AddEditStudentsInscription.tsx";
+
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -58,6 +62,20 @@ const router = createBrowserRouter([
         element: <AddEditMasters />,
       },
       //END MASTERS
+      //STUDENTINSCRIPTION
+      {
+        path: "/studentinscription",
+        element: <StudentsInscriptionPage />,
+      },
+      {
+        path: "/student_inscription/add",
+        element: <AddEditStudentsInscription/>,
+      },
+      {
+        path: "/studentinscription/:id",
+        element: <AddEditStudentsInscription />,
+      },
+      //END STUDENTINSCRIPTION
     ],
   },
 ]);
