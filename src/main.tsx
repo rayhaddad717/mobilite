@@ -38,6 +38,7 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     errorElement: <ErrorPage />,
+
     children: [
       //UNIVERSITY
       {
@@ -171,6 +172,10 @@ const router = createBrowserRouter([
       //END STUDENTINSCRIPTION
       {
         path: "/login",
+        element: <LoginPage />,
+      },
+      {
+        path: "/",
         element: <LoginPage />,
       },
     ],

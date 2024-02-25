@@ -10,6 +10,7 @@ import API from "@/api/API";
 import { useToast } from "../ui/use-toast";
 import { ToastAction } from "../ui/toast";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 const formSchema = z.object({
   username: z.string().min(1),
   password: z.string().min(1),
@@ -25,6 +26,9 @@ function LoginPage() {
     },
   });
 
+  useEffect(() => {
+    if (localStorage.getItem("isLoggedIn") === "true") navigate("/university");
+  }, [navigate]);
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const { username, password } = values;
     try {
