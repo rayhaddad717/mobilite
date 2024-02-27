@@ -73,6 +73,7 @@ export default function StudentInscriptionPage() {
       | "non-autorise-list-attente" //NOT ELLIGILE
       | "admis"
       | "will-travel"
+      | "boursier"
   ) {
     try {
       const response = await API.get(`/${API_URL_HEADER}/export?type=${type}`, {
@@ -82,10 +83,18 @@ export default function StudentInscriptionPage() {
       const file = new Blob([response.data], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      saveAs(file, `${NAVIGATE_HEADER}.xlsx`);
+      const mapper = {
+        inscrit: "Inscrits",
+        "autorise-elligible": "Autorise",
+        "non-autorise-list-attente": "List D'attente",
+        admis: "Admis",
+        "will-travel": "En Voyage",
+        boursier: "Boursier",
+      };
+      saveAs(file, `${mapper[type]}.xlsx`);
       toast({
         title: "Success",
-        description: `Successfully exported ${NAVIGATE_HEADER}`,
+        description: `Successfully exported ${mapper[type]}`,
         action: <ToastAction altText="Goto schedule to undo">Done</ToastAction>,
       });
     } catch (error) {
@@ -128,6 +137,7 @@ export default function StudentInscriptionPage() {
                 | "non-autorise-list-attente"
                 | "admis"
                 | "will-travel"
+                | "boursier"
             )
           }
         >
@@ -143,6 +153,7 @@ export default function StudentInscriptionPage() {
                 value: "non-autorise-list-attente",
               },
               { name: "Download Admis", value: "admis" },
+              { name: "Download Boursier", value: "boursier" },
               { name: "Download Etudiant en voyage", value: "will-travel" },
             ].map((type) => (
               <SelectItem value={type.value}>{type.name}</SelectItem>

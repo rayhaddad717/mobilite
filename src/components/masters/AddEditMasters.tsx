@@ -328,10 +328,30 @@ function AddEditMasters() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Diploma Type</FormLabel>
-                  <FormControl>
-                    <Input placeholder="" {...field} />
-                  </FormControl>
-                  <FormMessage />
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    value={field.value?.toString()}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a Test" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {[
+                        { name: "Master de recherche", value: "M2R" },
+                        { name: "Double Diplome", value: "DD" },
+                      ].map((type, index) => (
+                        <SelectItem
+                          key={`type-${index}`}
+                          value={`${type.value}`}
+                        >
+                          {type.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </FormItem>
               )}
             />
