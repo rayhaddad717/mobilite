@@ -525,7 +525,7 @@ function AddEditStudentInscription() {
         </div>
         <div className="flex items-end gap-4 mt-4">
           <div>
-            <Label htmlFor="nomination_letter_file">Nomination Letterr</Label>
+            <Label htmlFor="nomination_letter_file">Nomination Letter</Label>
             <Input
               id="nomination_letter_file"
               type="file"
